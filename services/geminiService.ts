@@ -1,8 +1,6 @@
 import { GoogleGenAI, Modality } from '@google/genai';
 import { fileToGenerativePart } from '../utils/fileUtils';
 
-// The GoogleGenAI instance is now created per-request inside the function.
-
 export interface EditImageResult {
   imageUrl: string;
   tokensUsed: number;
@@ -10,14 +8,9 @@ export interface EditImageResult {
 
 export const editImage = async (
   file: File,
-  prompt: string,
-  apiKey: string
+  prompt: string
 ): Promise<EditImageResult> => {
-  if (!apiKey) {
-    throw new Error('API kulcs hiányzik. Kérlek, add meg az API kulcsodat.');
-  }
-  
-  const ai = new GoogleGenAI({ apiKey });
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
   try {
     const { base64, mimeType } = await fileToGenerativePart(file);
@@ -88,7 +81,7 @@ export const editImage = async (
     if (error instanceof Error) {
         // Handle specific API key error message from Gemini
         if (error.message.includes('API key not valid')) {
-            throw new Error('Érvénytelen API kulcs. Kérlek, ellenőrizd a megadott kulcsot.');
+            throw new Error('Érvénytelen vagy hiányzó API kulcs. Ellenőrizd a környezeti változókat.');
         }
         throw error;
     }

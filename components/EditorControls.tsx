@@ -9,7 +9,6 @@ interface EditorControlsProps {
   onUpscale: () => void;
   loadingAction: 'generate' | 'upscale' | null;
   isFileSelected: boolean;
-  isApiKeySet: boolean;
 }
 
 const LoadingSpinner: React.FC = () => (
@@ -28,7 +27,6 @@ export const EditorControls: React.FC<EditorControlsProps> = ({
   onUpscale,
   loadingAction,
   isFileSelected,
-  isApiKeySet,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isLoading = loadingAction !== null;
@@ -89,7 +87,7 @@ export const EditorControls: React.FC<EditorControlsProps> = ({
       <div className="space-y-4">
         <button
           onClick={onGenerate}
-          disabled={!isFileSelected || !prompt || isLoading || !isApiKeySet}
+          disabled={!isFileSelected || !prompt || isLoading}
           className="w-full bg-brand-primary text-white font-bold py-3 px-4 rounded-lg hover:bg-brand-secondary transition-all duration-300 transform hover:scale-105 disabled:bg-base-300 disabled:text-text-secondary/50 disabled:cursor-not-allowed disabled:scale-100 flex items-center justify-center gap-2"
         >
           {loadingAction === 'generate' ? (
@@ -110,7 +108,7 @@ export const EditorControls: React.FC<EditorControlsProps> = ({
 
         <button
             onClick={onUpscale}
-            disabled={!isFileSelected || isLoading || !isApiKeySet}
+            disabled={!isFileSelected || isLoading}
             className="w-full bg-base-300 text-text-primary font-bold py-3 px-4 rounded-lg hover:bg-base-100 transition-all duration-300 transform hover:scale-105 disabled:bg-base-300 disabled:text-text-secondary/50 disabled:cursor-not-allowed disabled:scale-100 flex items-center justify-center gap-2"
         >
             {loadingAction === 'upscale' ? (

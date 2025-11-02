@@ -83,17 +83,18 @@ export const ScaleIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
     </svg>
 );
 
+// FIX: Added EyeIcon and EyeOffIcon to fix compilation errors in ApiKeyManager.tsx
 export const EyeIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width="24" 
-    height="24" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
+    <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
     {...props}
     >
         <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
@@ -102,16 +103,16 @@ export const EyeIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 );
 
 export const EyeOffIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width="24" 
-    height="24" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
+    <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
     {...props}
     >
         <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>

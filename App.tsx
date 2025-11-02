@@ -2,12 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { EditorControls } from './components/EditorControls';
 import { ImageViewer } from './components/ImageViewer';
-import { ApiKeyManager } from './components/ApiKeyManager';
 import { editImage } from './services/geminiService';
 
 const DAILY_TOKEN_LIMIT = 1000000;
 const TOKEN_STORAGE_KEY = 'mifoto_token_usage';
-const API_KEY_STORAGE_KEY = 'mifoto_api_key';
 
 interface TokenUsage {
   count: number;
@@ -23,16 +21,9 @@ const App: React.FC = () => {
   const [prompt, setPrompt] = useState<string>('');
   const [loadingAction, setLoadingAction] = useState<LoadingAction>(null);
   const [error, setError] = useState<string | null>(null);
-  const [apiKey, setApiKeyInternal] = useState<string | null>(null);
   const [tokensUsedToday, setTokensUsedToday] = useState<number>(0);
 
   useEffect(() => {
-    // API kulcs betöltése
-    const storedApiKey = localStorage.getItem(API_KEY_STORAGE_KEY);
-    if (storedApiKey) {
-      setApiKeyInternal(storedApiKey);
-    }
-
     // Token-használat betöltése
     const storedUsage = localStorage.getItem(TOKEN_STORAGE_KEY);
     const today = new Date().toISOString().split('T')[0];
@@ -51,15 +42,6 @@ const App: React.FC = () => {
     }
   }, []);
 
-  const setApiKey = (key: string | null) => {
-    setApiKeyInternal(key);
-    if (key) {
-      localStorage.setItem(API_KEY_STORAGE_KEY, key);
-    } else {
-      localStorage.removeItem(API_KEY_STORAGE_KEY);
-    }
-  };
-
   const handleFileChange = (file: File | null) => {
     setOriginalFile(file);
     setEditedImage(null);
@@ -76,10 +58,7 @@ const App: React.FC = () => {
   };
   
   const performImageEdit = async (promptToUse: string, action: NonNullable<LoadingAction>) => {
-    if (!originalFile || !promptToUse || !apiKey) {
-      if (!apiKey) {
-        setError("API kulcs nincs beállítva. Kérlek, add meg a kulcsot a szerkesztéshez.");
-      }
+    if (!originalFile || !promptToUse) {
       return;
     }
 
@@ -88,7 +67,7 @@ const App: React.FC = () => {
     setError(null);
 
     try {
-      const result = await editImage(originalFile, promptToUse, apiKey);
+      const result = await editImage(originalFile, promptToUse);
       setEditedImage(result.imageUrl);
       
       const newTotalTokens = tokensUsedToday + result.tokensUsed;
@@ -118,18 +97,25 @@ const App: React.FC = () => {
     performImageEdit(upscalePrompt, 'upscale');
   }
 
-  const isApiKeySet = !!apiKey;
+  const percentageUsed = DAILY_TOKEN_LIMIT > 0 ? (tokensUsedToday / DAILY_TOKEN_LIMIT) * 100 : 0;
 
   return (
     <div className="min-h-screen bg-base-100 text-text-primary font-sans flex flex-col">
       <Header />
       <main className="container mx-auto px-4 md:px-8 py-8 flex-grow">
-        <ApiKeyManager 
-            apiKey={apiKey}
-            setApiKey={setApiKey}
-            tokensUsed={tokensUsedToday}
-            tokenLimit={DAILY_TOKEN_LIMIT}
-        />
+        <div className="mb-6 bg-base-200 p-4 rounded-lg shadow">
+          <div className="flex justify-between items-center mb-2 text-sm">
+              <span className="font-semibold text-text-primary">Napi Token Felhasználás (becsült)</span>
+              <span className="text-text-secondary">{tokensUsedToday.toLocaleString()} / {DAILY_TOKEN_LIMIT.toLocaleString()}</span>
+          </div>
+          <div className="w-full bg-base-300 rounded-full h-2.5">
+              <div 
+                  className="bg-gradient-to-r from-brand-secondary to-brand-primary h-2.5 rounded-full transition-all duration-500" 
+                  style={{ width: `${Math.min(percentageUsed, 100)}%` }}
+              ></div>
+          </div>
+        </div>
+
         {error && (
             <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative" role="alert">
                 <strong className="font-bold">Hiba! </strong>
@@ -146,7 +132,6 @@ const App: React.FC = () => {
               onUpscale={handleUpscale}
               loadingAction={loadingAction}
               isFileSelected={!!originalFile}
-              isApiKeySet={isApiKeySet}
             />
           </div>
           <div className="lg:col-span-2">
@@ -164,8 +149,8 @@ const App: React.FC = () => {
         <a href="https://www.mifoto.hu" target="_blank" rel="noopener noreferrer" className="text-brand-primary hover:text-brand-secondary transition-colors">
           www.mifoto.hu
         </a>
-        <p className="mt-4">Az applikáció használata ingyenes, de Google API kulcs megadása, regisztrálása szükséges.</p>
-        <p>Ingyenes kvótában naponta maximum 1M tokent tudsz felhasználni , és 60 kérés/perc a limit.</p>
+        <p className="mt-4">Az applikáció a Google Gemini API erejét használja.</p>
+        <p>A Google ingyenes kvótát biztosít, melynek keretében a napi token limit {DAILY_TOKEN_LIMIT.toLocaleString()}, a percenkénti kérések száma pedig 60.</p>
       </footer>
     </div>
   );
