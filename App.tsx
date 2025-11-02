@@ -3,9 +3,11 @@ import { Header } from './components/Header';
 import { EditorControls } from './components/EditorControls';
 import { ImageViewer } from './components/ImageViewer';
 import { editImage } from './services/geminiService';
+import { ApiKeyManager } from './components/ApiKeyManager';
 
 const DAILY_TOKEN_LIMIT = 1000000;
 const TOKEN_STORAGE_KEY = 'mifoto_token_usage';
+const API_KEY_STORAGE_KEY = 'mifoto_api_key';
 
 interface TokenUsage {
   count: number;
@@ -22,6 +24,7 @@ const App: React.FC = () => {
   const [loadingAction, setLoadingAction] = useState<LoadingAction>(null);
   const [error, setError] = useState<string | null>(null);
   const [tokensUsedToday, setTokensUsedToday] = useState<number>(0);
+  const [apiKey, setApiKey] = useState<string | null>(null);
 
   useEffect(() => {
     // Token-használat betöltése
@@ -40,7 +43,22 @@ const App: React.FC = () => {
         localStorage.removeItem(TOKEN_STORAGE_KEY);
       }
     }
+    
+    // API kulcs betöltése
+    const storedApiKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+    if (storedApiKey) {
+        setApiKey(storedApiKey);
+    }
   }, []);
+
+  const handleSetApiKey = (key: string | null) => {
+    setApiKey(key);
+    if (key) {
+        localStorage.setItem(API_KEY_STORAGE_KEY, key);
+    } else {
+        localStorage.removeItem(API_KEY_STORAGE_KEY);
+    }
+  };
 
   const handleFileChange = (file: File | null) => {
     setOriginalFile(file);
@@ -62,12 +80,17 @@ const App: React.FC = () => {
       return;
     }
 
+    if (!apiKey) {
+      setError("A képszerkesztéshez meg kell adnod az API kulcsodat.");
+      return;
+    }
+
     setLoadingAction(action);
     setEditedImage(null);
     setError(null);
 
     try {
-      const result = await editImage(originalFile, promptToUse);
+      const result = await editImage(originalFile, promptToUse, apiKey);
       setEditedImage(result.imageUrl);
       
       const newTotalTokens = tokensUsedToday + result.tokensUsed;
@@ -79,7 +102,12 @@ const App: React.FC = () => {
 
     } catch (err) {
       if (err instanceof Error) {
-        setError(err.message);
+        if (err.message.includes('API key not valid') || err.message.includes('Érvénytelen API kulcs')) {
+            setError('Érvénytelen API kulcs. Kérlek, ellenőrizd és add meg újra.');
+            handleSetApiKey(null); // Clear invalid key
+        } else {
+            setError(err.message);
+        }
       } else {
         setError('Ismeretlen hiba történt a kép generálása során.');
       }
@@ -97,24 +125,17 @@ const App: React.FC = () => {
     performImageEdit(upscalePrompt, 'upscale');
   }
 
-  const percentageUsed = DAILY_TOKEN_LIMIT > 0 ? (tokensUsedToday / DAILY_TOKEN_LIMIT) * 100 : 0;
-
   return (
     <div className="min-h-screen bg-base-100 text-text-primary font-sans flex flex-col">
       <Header />
       <main className="container mx-auto px-4 md:px-8 py-8 flex-grow">
-        <div className="mb-6 bg-base-200 p-4 rounded-lg shadow">
-          <div className="flex justify-between items-center mb-2 text-sm">
-              <span className="font-semibold text-text-primary">Napi Token Felhasználás (becsült)</span>
-              <span className="text-text-secondary">{tokensUsedToday.toLocaleString()} / {DAILY_TOKEN_LIMIT.toLocaleString()}</span>
-          </div>
-          <div className="w-full bg-base-300 rounded-full h-2.5">
-              <div 
-                  className="bg-gradient-to-r from-brand-secondary to-brand-primary h-2.5 rounded-full transition-all duration-500" 
-                  style={{ width: `${Math.min(percentageUsed, 100)}%` }}
-              ></div>
-          </div>
-        </div>
+        
+        <ApiKeyManager 
+            apiKey={apiKey}
+            setApiKey={handleSetApiKey}
+            tokensUsed={tokensUsedToday}
+            tokenLimit={DAILY_TOKEN_LIMIT}
+        />
 
         {error && (
             <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative" role="alert">

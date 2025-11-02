@@ -8,9 +8,13 @@ export interface EditImageResult {
 
 export const editImage = async (
   file: File,
-  prompt: string
+  prompt: string,
+  apiKey: string
 ): Promise<EditImageResult> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  if (!apiKey) {
+    throw new Error("API kulcs szükséges a művelethez.");
+  }
+  const ai = new GoogleGenAI({ apiKey: apiKey });
 
   try {
     const { base64, mimeType } = await fileToGenerativePart(file);
@@ -81,7 +85,7 @@ export const editImage = async (
     if (error instanceof Error) {
         // Handle specific API key error message from Gemini
         if (error.message.includes('API key not valid')) {
-            throw new Error('Érvénytelen vagy hiányzó API kulcs. Ellenőrizd a környezeti változókat.');
+            throw new Error('Érvénytelen API kulcs. Ellenőrizd a kulcsot és próbáld újra.');
         }
         throw error;
     }
