@@ -92,6 +92,10 @@ export const editImage = async (
         if (error.message.includes('API key not valid')) {
             throw new Error('Érvénytelen API kulcs. Ellenőrizd a kulcsot és próbáld újra.');
         }
+        // Handle Quota Exceeded (429) errors
+        if (error.message.includes('429') || error.message.includes('RESOURCE_EXHAUSTED') || error.message.includes('quota')) {
+             throw new Error('Elérted a Google API ingyenes kvótáját. Kérlek várj egy kicsit, vagy ellenőrizd a számlázási beállításokat a Google AI Studio-ban (https://aistudio.google.com/app/apikey).');
+        }
         throw error;
     }
     throw new Error('Kép generálása sikertelen egy ismeretlen hiba miatt.');
