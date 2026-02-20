@@ -30,7 +30,7 @@ const App: React.FC = () => {
     // Token-használat betöltése
     const storedUsage = localStorage.getItem(TOKEN_STORAGE_KEY);
     const today = new Date().toISOString().split('T')[0];
-
+    
     if (storedUsage) {
       try {
         const parsedUsage: TokenUsage = JSON.parse(storedUsage);
@@ -43,15 +43,16 @@ const App: React.FC = () => {
         localStorage.removeItem(TOKEN_STORAGE_KEY);
       }
     }
-
-    // API kulcs betöltése - először localStorage-ból, majd környezeti változóból
-    const storedApiKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+    
+    // API kulcs betöltése
     const envApiKey = import.meta.env.VITE_GEMINI_API_KEY;
-
-    if (storedApiKey) {
-        setApiKey(storedApiKey);
-    } else if (envApiKey) {
+    if (envApiKey) {
         setApiKey(envApiKey);
+    } else {
+        const storedApiKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+        if (storedApiKey) {
+            setApiKey(storedApiKey);
+        }
     }
   }, []);
 
@@ -84,9 +85,7 @@ const App: React.FC = () => {
       return;
     }
 
-    const effectiveApiKey = apiKey || import.meta.env.VITE_GEMINI_API_KEY;
-
-    if (!effectiveApiKey) {
+    if (!apiKey) {
       setError("A képszerkesztéshez meg kell adnod az API kulcsodat.");
       return;
     }
@@ -96,7 +95,7 @@ const App: React.FC = () => {
     setError(null);
 
     try {
-      const result = await editImage(originalFile, promptToUse, effectiveApiKey);
+      const result = await editImage(originalFile, promptToUse, apiKey);
       setEditedImage(result.imageUrl);
       
       const newTotalTokens = tokensUsedToday + result.tokensUsed;
@@ -172,7 +171,7 @@ const App: React.FC = () => {
         </a>
         <p className="mt-4">Az applikációt kiszolgáló Google modell a módosítás és skálázás során a saját adatbázisát taníthatja a mesterséges intelligencia erejével. Kérlek ezek ismeretében töltsd fel a fotókat.</p>
         <p>A kép módosítását a Google Nano Banana modellje végzi. Törekedj a minél pontosabb utasításra, a generátor tévedhet, ilyenkor próbáld újra.</p>
-        <p>A Google ingyenes kvótát biztosít, melynek keretében a napi token limit {DAILY_TOKEN_LIMIT.toLocaleString()}, a percenkénti kérések száma pedig 60.</p>
+        <p>A Google ingyenes kvótát biztosít: 15 kérés / perc, 1 500 kérés / nap, 1 millió token / perc.</p>
       </footer>
     </div>
   );

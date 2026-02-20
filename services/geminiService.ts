@@ -11,10 +11,13 @@ export const editImage = async (
   prompt: string,
   apiKey: string
 ): Promise<EditImageResult> => {
-  if (!apiKey) {
+  // Use environment variable if available, otherwise use the passed key
+  const finalApiKey = import.meta.env.VITE_GEMINI_API_KEY || apiKey;
+
+  if (!finalApiKey) {
     throw new Error("API kulcs szükséges a művelethez.");
   }
-  const ai = new GoogleGenAI({ apiKey: apiKey });
+  const ai = new GoogleGenAI({ apiKey: finalApiKey });
 
   try {
     const { base64, mimeType } = await fileToGenerativePart(file);
