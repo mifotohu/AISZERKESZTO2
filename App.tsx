@@ -30,7 +30,7 @@ const App: React.FC = () => {
     // Token-használat betöltése
     const storedUsage = localStorage.getItem(TOKEN_STORAGE_KEY);
     const today = new Date().toISOString().split('T')[0];
-    
+
     if (storedUsage) {
       try {
         const parsedUsage: TokenUsage = JSON.parse(storedUsage);
@@ -43,11 +43,15 @@ const App: React.FC = () => {
         localStorage.removeItem(TOKEN_STORAGE_KEY);
       }
     }
-    
-    // API kulcs betöltése
+
+    // API kulcs betöltése - először localStorage-ból, majd környezeti változóból
     const storedApiKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+    const envApiKey = import.meta.env.VITE_GEMINI_API_KEY;
+
     if (storedApiKey) {
         setApiKey(storedApiKey);
+    } else if (envApiKey) {
+        setApiKey(envApiKey);
     }
   }, []);
 
@@ -80,7 +84,9 @@ const App: React.FC = () => {
       return;
     }
 
-    if (!apiKey) {
+    const effectiveApiKey = apiKey || import.meta.env.VITE_GEMINI_API_KEY;
+
+    if (!effectiveApiKey) {
       setError("A képszerkesztéshez meg kell adnod az API kulcsodat.");
       return;
     }
@@ -90,7 +96,7 @@ const App: React.FC = () => {
     setError(null);
 
     try {
-      const result = await editImage(originalFile, promptToUse, apiKey);
+      const result = await editImage(originalFile, promptToUse, effectiveApiKey);
       setEditedImage(result.imageUrl);
       
       const newTotalTokens = tokensUsedToday + result.tokensUsed;
