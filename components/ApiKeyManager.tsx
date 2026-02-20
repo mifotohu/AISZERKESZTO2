@@ -26,7 +26,22 @@ export const ApiKeyManager: React.FC<ApiKeyManagerProps> = ({ apiKey, setApiKey,
   if (!apiKey) {
     return (
       <div className="mb-6 bg-yellow-100/10 border border-yellow-400/50 text-yellow-200 px-4 py-4 rounded-lg shadow-lg">
-        <h3 className="font-bold text-lg mb-2">API Kulcs szükséges</h3>
+        <div className="flex items-center gap-2 mb-2">
+            <h3 className="font-bold text-lg">API Kulcs szükséges</h3>
+            <div className="relative group">
+                <button className="w-5 h-5 rounded-full bg-brand-primary text-white text-xs font-bold flex items-center justify-center cursor-help">?</button>
+                <div className="absolute left-0 top-full mt-2 w-64 p-3 bg-base-300 border border-base-200 rounded-lg shadow-xl text-xs text-text-secondary opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                    <p className="font-bold mb-1 text-text-primary">Így szerezz API kulcsot:</p>
+                    <ol className="list-decimal list-inside space-y-1">
+                        <li>Kattints a lenti linkre.</li>
+                        <li>Jelentkezz be a Google fiókoddal.</li>
+                        <li>Kattints a "Get API key" gombra.</li>
+                        <li>Válaszd a "Create API key in new project" opciót.</li>
+                        <li>Másold ki a kapott kulcsot.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
         <p className="text-sm mb-4">
           A képszerkesztéshez meg kell adnia a Google AI Studio API kulcsát. A kulcsot ingyenesen létrehozhatja{' '}
           <a

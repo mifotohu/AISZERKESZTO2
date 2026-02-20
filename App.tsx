@@ -14,7 +14,7 @@ interface TokenUsage {
   date: string;
 }
 
-type LoadingAction = 'generate' | 'upscale' | null;
+type LoadingAction = 'generate' | null;
 
 const App: React.FC = () => {
   const [originalFile, setOriginalFile] = useState<File | null>(null);
@@ -120,11 +120,6 @@ const App: React.FC = () => {
     performImageEdit(prompt, 'generate');
   };
 
-  const handleUpscale = () => {
-    const upscalePrompt = "Növeld a kép felbontását, javítsd a részleteket és a képminőséget a stílus megváltoztatása nélkül.";
-    performImageEdit(upscalePrompt, 'upscale');
-  }
-
   return (
     <div className="min-h-screen bg-base-100 text-text-primary font-sans flex flex-col">
       <Header />
@@ -150,7 +145,6 @@ const App: React.FC = () => {
               prompt={prompt}
               setPrompt={setPrompt}
               onGenerate={handleGenerate}
-              onUpscale={handleUpscale}
               loadingAction={loadingAction}
               isFileSelected={!!originalFile}
             />
@@ -170,7 +164,8 @@ const App: React.FC = () => {
         <a href="https://www.mifoto.hu" target="_blank" rel="noopener noreferrer" className="text-brand-primary hover:text-brand-secondary transition-colors">
           www.mifoto.hu
         </a>
-        <p className="mt-4">Az applikáció a Google Gemini API erejét használja.</p>
+        <p className="mt-4">Az applikációt kiszolgáló Google modell a módosítás és skálázás során a saját adatbázisát taníthatja a mesterséges intelligencia erejével. Kérlek ezek ismeretében töltsd fel a fotókat.</p>
+        <p>A kép módosítását a Google Nano Banana modellje végzi. Törekedj a minél pontosabb utasításra, a generátor tévedhet, ilyenkor próbáld újra.</p>
         <p>A Google ingyenes kvótát biztosít, melynek keretében a napi token limit {DAILY_TOKEN_LIMIT.toLocaleString()}, a percenkénti kérések száma pedig 60.</p>
       </footer>
     </div>

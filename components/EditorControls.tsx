@@ -6,8 +6,7 @@ interface EditorControlsProps {
   prompt: string;
   setPrompt: (prompt: string) => void;
   onGenerate: () => void;
-  onUpscale: () => void;
-  loadingAction: 'generate' | 'upscale' | null;
+  loadingAction: 'generate' | null;
   isFileSelected: boolean;
 }
 
@@ -24,7 +23,6 @@ export const EditorControls: React.FC<EditorControlsProps> = ({
   prompt,
   setPrompt,
   onGenerate,
-  onUpscale,
   loadingAction,
   isFileSelected,
 }) => {
@@ -98,30 +96,6 @@ export const EditorControls: React.FC<EditorControlsProps> = ({
           ) : (
             'Kép generálása'
           )}
-        </button>
-
-        <div className="relative flex items-center">
-            <div className="flex-grow border-t border-base-300"></div>
-            <span className="flex-shrink mx-4 text-xs text-text-secondary uppercase">Vagy</span>
-            <div className="flex-grow border-t border-base-300"></div>
-        </div>
-
-        <button
-            onClick={onUpscale}
-            disabled={!isFileSelected || isLoading}
-            className="w-full bg-base-300 text-text-primary font-bold py-3 px-4 rounded-lg hover:bg-base-100 transition-all duration-300 transform hover:scale-105 disabled:bg-base-300 disabled:text-text-secondary/50 disabled:cursor-not-allowed disabled:scale-100 flex items-center justify-center gap-2"
-        >
-            {loadingAction === 'upscale' ? (
-                <>
-                    <LoadingSpinner />
-                    Feldolgozás...
-                </>
-            ) : (
-                <>
-                    <ScaleIcon className="w-5 h-5 mr-2" />
-                    Felbontás növelése (Upscale)
-                </>
-            )}
         </button>
       </div>
     </div>

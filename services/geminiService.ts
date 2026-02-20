@@ -27,7 +27,7 @@ export const editImage = async (
     };
 
     const textPart = {
-      text: `${prompt}\n\nOutput only the generated image.`,
+      text: `${prompt}\n\nIMPORTANT: You are an image editing tool. Output ONLY the edited image. Do not describe it.`,
     };
 
     const response = await ai.models.generateContent({
@@ -79,7 +79,11 @@ export const editImage = async (
 
     // 6. Végső, általános hibaüzenet, ha semmi mást nem találtunk.
     console.log('Full response:', JSON.stringify(response, null, 2));
-    throw new Error(`Az API nem generált képet. A válasz nem tartalmazta a várt képadatokat. Finish reason: ${candidate.finishReason || 'Unknown'}`);
+    const finishReason = candidate.finishReason || 'Unknown';
+    if (finishReason === 'IMAGE_OTHER') {
+        throw new Error('A kép generálása sikertelen volt (IMAGE_OTHER). Ez általában akkor fordul elő, ha a modell nem tudja értelmezni a kérést képmanipulációként, vagy a kért művelet túl komplex. Kérlek, próbáld meg egyszerűbb utasítással.');
+    }
+    throw new Error(`Az API nem generált képet. A válasz nem tartalmazta a várt képadatokat. Finish reason: ${finishReason}`);
 
   } catch (error) {
     console.error('Hiba a kép szerkesztése közben a Gemini API-val:', error);
