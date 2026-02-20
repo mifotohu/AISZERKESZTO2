@@ -27,15 +27,12 @@ export const editImage = async (
     };
 
     const textPart = {
-      text: prompt,
+      text: `${prompt}\n\nOutput only the generated image.`,
     };
 
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: { parts: [imagePart, textPart] },
-      config: {
-        responseModalities: [Modality.IMAGE],
-      },
     });
     
     // 1. Először ellenőrizzük, hogy a kérést magát blokkolta-e a rendszer.
@@ -74,11 +71,15 @@ export const editImage = async (
     // 5. Ellenőrizzük, hogy az API szöveget adott-e kép helyett.
     const responseText = response.text?.trim();
     if (responseText) {
-        throw new Error(`Az API szöveges választ adott a kép helyett: "${responseText}"`);
+        // Logoljuk a kapott részek típusait a hibakereséshez
+        const partTypes = candidate.content?.parts?.map(p => Object.keys(p).join(',')).join('; ') || 'unknown';
+        console.log('Full response:', JSON.stringify(response, null, 2));
+        throw new Error(`Az API szöveges választ adott a kép helyett: "${responseText}". (Kapott részek: ${partTypes})`);
     }
 
     // 6. Végső, általános hibaüzenet, ha semmi mást nem találtunk.
-    throw new Error('Az API nem generált képet. A válasz nem tartalmazta a várt képadatokat, és nem adott meg konkrét hibaokot.');
+    console.log('Full response:', JSON.stringify(response, null, 2));
+    throw new Error(`Az API nem generált képet. A válasz nem tartalmazta a várt képadatokat. Finish reason: ${candidate.finishReason || 'Unknown'}`);
 
   } catch (error) {
     console.error('Hiba a kép szerkesztése közben a Gemini API-val:', error);
