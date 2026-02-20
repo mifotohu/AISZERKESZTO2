@@ -34,7 +34,7 @@ export const editImage = async (
     };
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
+      model: 'gemini-1.5-flash',
       contents: { parts: [imagePart, textPart] },
     });
     
